@@ -22,8 +22,8 @@ This is an example of how an integration layer can be used to organize an applic
 
 * `help` displays all commands.
 * `new <holder name>` creates a new account owned by the specified holder.
-* `list` lists all existing accounts.
-* `list <holder name>` lists all accounts owned by the specified holder.
+* `list` lists all existing people.
+* `list <holder name>` lists all people owned by the specified holder.
 * `balance <account number>` shows the balance of the account with the specified number.
 * `deposit <account number> <amount>` deposits the specified amount to the account with the specified number.
 * `withdraw <account number> <amount>` withdraws the specified amount from the account with the specified number.

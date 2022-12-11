@@ -26,19 +26,18 @@ package se.kth.iv1351.bankjdbc.model;
 /**
  * An account in the bank.
  */
-public class Account implements AccountDTO {
-    private int balance;
+public class Person implements PersonDTO {
+    private int id;
     private String holderName;
-    private String acctNo;
+    private String ssn;
 
     /**
      * Creates an account for the specified holder with the balance zero. The account
      * number is unspecified.
      *
      * @param holderName The account holder's holderName.
-     * @param bankDB     The DAO used to store updates to the database.
      */
-    public Account(String holderName) {
+    public Person(String holderName) {
         this(null, holderName, 0);
     }
 
@@ -49,7 +48,7 @@ public class Account implements AccountDTO {
      * @param holderName The account holder's holderName.
      * @param balance    The initial balance.
      */
-    public Account(String holderName, int balance) {
+    public Person(String holderName, int balance) {
         this(null, holderName, balance);
     }
 
@@ -57,70 +56,35 @@ public class Account implements AccountDTO {
      * Creates an account for the specified holder with the specified balance and account
      * number.
      *
-     * @param acctNo     The account number.
+     * @param ssn     The person ssn.
      * @param holderName The account holder's holderName.
-     * @param balance    The initial balance.
+     * @param id    The person id.
      */
-    public Account(String acctNo, String holderName, int balance) {
-        this.acctNo = acctNo;
+    public Person(String ssn, String holderName, int id) {
+        this.ssn = ssn;
         this.holderName = holderName;
-        this.balance = balance;
+        this.id = id;
     }
 
     /**
      * @return The account number.
      */
-    public String getAccountNo() {
-        return acctNo;
+    public int getPersonId() {
+        return id;
     }
 
     /**
      * @return The balance.
      */
-    public int getBalance() {
-        return balance;
+    public String getSSN() {
+        return ssn;
     }
 
     /**
      * @return The holder's name.
      */
-    public String getHolderName() {
+    public String getName() {
         return holderName;
-    }
-
-    /**
-     * Deposits the specified amount.
-     *
-     * @param amount The amount to deposit.
-     * @throws AccountException If the specified amount is negative, or if unable to
-     *                          perform the update.
-     */
-    public void deposit(int amount) throws RejectedException {
-        if (amount < 0) {
-            throw new RejectedException("Tried to deposit negative value, illegal value: "
-                                        + amount + ", account: " + this);
-    }
-        balance = balance + amount;
-    }
-
-    /**
-     * Withdraws the specified amount.
-     *
-     * @param amount The amount to withdraw.
-     * @throws AccountException If the specified amount is negative, if the amount
-     *                          is larger than the balance, or if unable to perform
-     *                          the update.
-     */
-    public void withdraw(int amount) throws RejectedException {
-        if (amount < 0) {
-            throw new RejectedException("Tried to withdraw negative value, illegal value: "
-                                        + amount + ", account: " + this);
-        }
-        if (balance - amount < 0) {
-            throw new RejectedException("Overdraft attempt, illegal value: " + amount
-                                        + ", account: " + this);
-        }
-        balance = balance - amount;
     }
 
     /**
@@ -129,13 +93,13 @@ public class Account implements AccountDTO {
     @Override
     public String toString() {
         StringBuilder stringRepresentation = new StringBuilder();
-        stringRepresentation.append("Account: [");
-        stringRepresentation.append("account number: ");
-        stringRepresentation.append(acctNo);
-        stringRepresentation.append(", holder: ");
-        stringRepresentation.append(holderName);
-        stringRepresentation.append(", balance: ");
-        stringRepresentation.append(balance);
+        stringRepresentation.append("Person : [");
+        stringRepresentation.append("id: ");
+        stringRepresentation.append(this.id);
+        stringRepresentation.append(", name: ");
+        stringRepresentation.append(this.holderName);
+        stringRepresentation.append(", ssn: ");
+        stringRepresentation.append(this.ssn);
         stringRepresentation.append("]");
         return stringRepresentation.toString();
     }

@@ -21,24 +21,29 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.model;
+package se.kth.iv1351.bankjdbc.integration;
 
 /**
- * Specifies a read-only view of an account.
+ * Thrown when a call to the bank database fails.
  */
-public interface AccountDTO {
-    /**
-     * @return The account number.
-     */
-    public String getAccountNo();
+public class SchoolDBException extends Exception {
 
     /**
-     * @return The balance.
+     * Create a new instance thrown because of the specified reason.
+     *
+     * @param reason Why the exception was thrown.
      */
-    public int getBalance();
+    public SchoolDBException(String reason) {
+        super(reason);
+    }
 
     /**
-     * @return The holder's name.
+     * Create a new instance thrown because of the specified reason and exception.
+     *
+     * @param reason    Why the exception was thrown.
+     * @param rootCause The exception that caused this exception to be thrown.
      */
-    public String getHolderName();
+    public SchoolDBException(String reason, Throwable rootCause) {
+        super(reason, rootCause);
+    }
 }

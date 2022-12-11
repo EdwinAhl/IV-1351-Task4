@@ -21,29 +21,24 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.integration;
+package se.kth.iv1351.bankjdbc.model;
 
 /**
- * Thrown when a call to the bank database fails.
+ * Specifies a read-only view of an account.
  */
-public class BankDBException extends Exception {
+public interface PersonDTO {
+    /**
+     * @return The account number.
+     */
+    public int getPersonId();
 
     /**
-     * Create a new instance thrown because of the specified reason.
-     *
-     * @param reason Why the exception was thrown.
+     * @return The balance.
      */
-    public BankDBException(String reason) {
-        super(reason);
-    }
+    public String getSSN();
 
     /**
-     * Create a new instance thrown because of the specified reason and exception.
-     *
-     * @param reason    Why the exception was thrown.
-     * @param rootCause The exception that caused this exception to be thrown.
+     * @return The holder's name.
      */
-    public BankDBException(String reason, Throwable rootCause) {
-        super(reason, rootCause);
-    }
+    public String getName();
 }

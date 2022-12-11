@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import se.kth.iv1351.bankjdbc.controller.Controller;
-import se.kth.iv1351.bankjdbc.model.AccountDTO;
+import se.kth.iv1351.bankjdbc.model.PersonDTO;
 
 /**
  * Reads and interprets user commands. This command interpreter is blocking, the user
@@ -50,7 +50,7 @@ public class BlockingInterpreter {
     }
 
     /**
-     * Stops the commend interpreter.
+     * Stops the command interpreter.
      */
     public void stop() {
         keepReceivingCmds = false;
@@ -78,39 +78,14 @@ public class BlockingInterpreter {
                     case QUIT:
                         keepReceivingCmds = false;
                         break;
-                    case NEW:
-                        ctrl.createAccount(cmdLine.getParameter(0));
-                        break;
-                    case DELETE:
-                        ctrl.deleteAccount(cmdLine.getParameter(0));
-                        break;
                     case LIST:
-                        List<? extends AccountDTO> accounts = null;
-                        if (cmdLine.getParameter(0).equals("")) {
-                            accounts = ctrl.getAllAccounts();
-                        } else {
-                            accounts = ctrl.getAccountsForHolder(cmdLine.getParameter(0));
-                        }
-                        for (AccountDTO account : accounts) {
-                            System.out.println("acct no: " + account.getAccountNo() + ", "
-                                             + "holder: " + account.getHolderName() + ", "
-                                             + "balance: " + account.getBalance());
-                        }
-                        break;
-                    case DEPOSIT:
-                        ctrl.deposit(cmdLine.getParameter(0), 
-                                     Integer.parseInt(cmdLine.getParameter(1)));
-                        break;
-                    case WITHDRAW:
-                        ctrl.withdraw(cmdLine.getParameter(0), 
-                                      Integer.parseInt(cmdLine.getParameter(1)));
-                        break;
-                    case BALANCE:
-                        AccountDTO acct = ctrl.getAccount(cmdLine.getParameter(0));
-                        if (acct != null) {
-                            System.out.println(acct.getBalance());
-                        } else {
-                            System.out.println("No such account");
+                        List<? extends PersonDTO> accounts = ctrl.getAllAccounts();
+//                        if (cmdLine.getParameter(0).equals("")) {
+
+                        for (PersonDTO account : accounts) {
+                            System.out.println("person id: " + account.getPersonId() + ", "
+                                             + "name: " + account.getName() + ", "
+                                             + "ssn: " + account.getSSN());
                         }
                         break;
                     default:
