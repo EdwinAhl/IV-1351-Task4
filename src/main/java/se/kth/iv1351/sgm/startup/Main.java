@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.startup;
+package se.kth.iv1351.sgm.startup;
 
-import se.kth.iv1351.bankjdbc.controller.Controller;
-import se.kth.iv1351.bankjdbc.integration.SchoolDBException;
-import se.kth.iv1351.bankjdbc.view.BlockingInterpreter;
+import se.kth.iv1351.sgm.controller.Controller;
+import se.kth.iv1351.sgm.integration.SchoolDBException;
+import se.kth.iv1351.sgm.view.BlockingInterpreter;
 
 /**
  * Starts the bank client.

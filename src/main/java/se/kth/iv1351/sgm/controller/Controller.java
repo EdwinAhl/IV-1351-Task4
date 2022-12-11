@@ -21,14 +21,14 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.controller;
+package se.kth.iv1351.sgm.controller;
 
 import java.util.List;
 
-import se.kth.iv1351.bankjdbc.integration.SchoolDAO;
-import se.kth.iv1351.bankjdbc.integration.SchoolDBException;
-import se.kth.iv1351.bankjdbc.model.PersonDTO;
-import se.kth.iv1351.bankjdbc.model.AccountException;
+import se.kth.iv1351.sgm.integration.SchoolDAO;
+import se.kth.iv1351.sgm.integration.SchoolDBException;
+import se.kth.iv1351.sgm.model.PersonDTO;
+import se.kth.iv1351.sgm.model.AccountException;
 
 /**
  * This is the application's only controller, all calls to the model pass here.

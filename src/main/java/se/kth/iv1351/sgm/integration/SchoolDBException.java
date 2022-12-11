@@ -21,7 +21,7 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.integration;
+package se.kth.iv1351.sgm.integration;
 
 /**
  * Thrown when a call to the bank database fails.
