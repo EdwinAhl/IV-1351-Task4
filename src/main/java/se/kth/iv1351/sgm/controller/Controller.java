@@ -27,6 +27,7 @@ import java.util.List;
 
 import se.kth.iv1351.sgm.integration.SchoolDAO;
 import se.kth.iv1351.sgm.integration.SchoolDBException;
+import se.kth.iv1351.sgm.model.InstrumentDTO;
 import se.kth.iv1351.sgm.model.PersonDTO;
 import se.kth.iv1351.sgm.model.AccountException;
 
@@ -37,7 +38,7 @@ import se.kth.iv1351.sgm.model.AccountException;
  * the data, and finally tells the DAO to store the updated data (if any).
  */
 public class Controller {
-    private final SchoolDAO bankDb;
+    private final SchoolDAO schoolDb;
 
     /**
      * Creates a new instance, and retrieves a connection to the database.
@@ -45,7 +46,7 @@ public class Controller {
      * @throws SchoolDBException If unable to connect to the database.
      */
     public Controller() throws SchoolDBException {
-        bankDb = new SchoolDAO();
+        schoolDb = new SchoolDAO();
     }
 
     /**
@@ -57,9 +58,17 @@ public class Controller {
      */
     public List<? extends PersonDTO> getAllAccounts() throws AccountException {
         try {
-            return bankDb.getAllPeople();
+            return schoolDb.getAllPeople();
         } catch (Exception e) {
             throw new AccountException("Unable to list accounts.", e);
+        }
+    }
+
+    public List<? extends InstrumentDTO> getInstruments(String type) throws AccountException {
+        try {
+            return schoolDb.getInstruments(type);
+        } catch (Exception e) {
+            throw new AccountException("Unable to list instruments.", e);
         }
     }
 
@@ -95,7 +104,7 @@ public class Controller {
 
     private void commitOngoingTransaction(String failureMsg) throws AccountException {
         try {
-            bankDb.commit();
+            schoolDb.commit();
         } catch (SchoolDBException bdbe) {
             throw new AccountException(failureMsg, bdbe);
         }

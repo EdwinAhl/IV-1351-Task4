@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import se.kth.iv1351.sgm.controller.Controller;
+import se.kth.iv1351.sgm.model.InstrumentDTO;
 import se.kth.iv1351.sgm.model.PersonDTO;
 
 /**
@@ -79,13 +80,9 @@ public class BlockingInterpreter {
                         keepReceivingCmds = false;
                         break;
                     case LIST:
-                        List<? extends PersonDTO> accounts = ctrl.getAllAccounts();
-//                        if (cmdLine.getParameter(0).equals("")) {
-
-                        for (PersonDTO account : accounts) {
-                            System.out.println("person id: " + account.getPersonId() + ", "
-                                             + "name: " + account.getName() + ", "
-                                             + "ssn: " + account.getSSN());
+                        List<? extends InstrumentDTO> instruments = ctrl.getInstruments(cmdLine.getParameter(1));
+                        for (InstrumentDTO instrument : instruments) {
+                           System.out.println(instrument);
                         }
                         break;
                     default:

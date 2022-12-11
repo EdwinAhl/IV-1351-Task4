@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import se.kth.iv1351.sgm.model.Instrument;
 import se.kth.iv1351.sgm.model.Person;
 
 /**
@@ -60,6 +61,25 @@ public class SchoolDAO {
         } catch (ClassNotFoundException | SQLException exception) {
             throw new SchoolDBException("Could not connect to datasource.", exception);
         }
+    }
+
+    public List<Instrument> getInstruments(String type) throws SchoolDBException {
+        String failureMsg = "Could not list instruments.";
+        List<Instrument> instruments = new ArrayList<>();
+        try (ResultSet result = findAllInstrument(type).executeQuery()) {
+            while (result.next()) {
+                instruments.add(new Instrument(
+                        result.getInt("id"),
+                        result.getInt("price"),
+                        result.getString("type"),
+                        result.getString("brand"),
+                        result.getString("quality")));
+            }
+            connection.commit();
+        } catch (SQLException sqle) {
+            handleException(failureMsg, sqle);
+        }
+        return instruments;
     }
 
     /**
@@ -110,6 +130,15 @@ public class SchoolDAO {
     private void prepareStatements() throws SQLException {
         findAllPeopleStatement = connection.prepareStatement("SELECT * FROM PERSON");
     }
+
+    private PreparedStatement findAllInstrument(String type) throws SQLException {
+        return connection.prepareStatement(
+                "SELECT id, price, brand, quality " +
+                "FROM rentable_instruments as t1 " +
+                "LEFT JOIN lease AS t2 ON t2.id = t1.lease_id " +
+                "WHERE t2.id IS NULL AND type ='" + type + "'");
+    }
+
 
     private void handleException(String failureMsg, Exception cause) throws SchoolDBException {
         String completeFailureMsg = failureMsg;
