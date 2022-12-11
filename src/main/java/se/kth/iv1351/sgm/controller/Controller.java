@@ -49,20 +49,6 @@ public class Controller {
         schoolDb = new SchoolDAO();
     }
 
-    /**
-     * Lists all accounts in the whole bank.
-     * 
-     * @return A list containing all accounts. The list is empty if there are no
-     *         accounts.
-     * @throws AccountException If unable to retrieve accounts.
-     */
-    public List<? extends PersonDTO> getAllAccounts() throws AccountException {
-        try {
-            return schoolDb.getAllPeople();
-        } catch (Exception e) {
-            throw new AccountException("Unable to list accounts.", e);
-        }
-    }
 
     public List<? extends InstrumentDTO> getInstruments(String type) throws AccountException {
         try {

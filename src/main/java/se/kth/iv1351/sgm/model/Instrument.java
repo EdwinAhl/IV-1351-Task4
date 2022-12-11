@@ -17,11 +17,11 @@ public class Instrument implements InstrumentDTO{
 
     @Override
     public String toString(){
-        return "id: " + getId() + "\n" +
-                "price: " + getPrice() + "\n" +
-                "type: " + getType() + "\n" +
-                "brand: " + getBrand() + "\n" +
-                "quality: " + getQuality();
+        return "id: " + getId() +
+                ", price: " + getPrice() +
+                //", type: " + getType() +
+                ", brand: " + getBrand() +
+                ", quality: " + getQuality();
     }
 
     @Override

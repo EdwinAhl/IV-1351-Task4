@@ -80,7 +80,7 @@ public class BlockingInterpreter {
                         keepReceivingCmds = false;
                         break;
                     case LIST:
-                        List<? extends InstrumentDTO> instruments = ctrl.getInstruments(cmdLine.getParameter(1));
+                        List<? extends InstrumentDTO> instruments = ctrl.getInstruments(cmdLine.getParameter(0));
                         for (InstrumentDTO instrument : instruments) {
                            System.out.println(instrument);
                         }

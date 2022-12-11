@@ -71,7 +71,7 @@ public class SchoolDAO {
                 instruments.add(new Instrument(
                         result.getInt("id"),
                         result.getInt("price"),
-                        result.getString("type"),
+                        type,
                         result.getString("brand"),
                         result.getString("quality")));
             }
@@ -82,28 +82,6 @@ public class SchoolDAO {
         return instruments;
     }
 
-    /**
-     * Retrieves all existing people.
-     *
-     * @return A list with all existing accounts. The list is empty if there are no
-     *         accounts.
-     * @throws SchoolDBException If failed to search for accounts.
-     */
-    public List<Person> getAllPeople() throws SchoolDBException {
-        String failureMsg = "Could not list people.";
-        List<Person> people = new ArrayList<>();
-        try (ResultSet result = findAllPeopleStatement.executeQuery()) {
-            while (result.next()) {
-                people.add(new Person(result.getString("name"),
-                                         result.getString("ssn"),
-                                         result.getInt("id")));
-            }
-            connection.commit();
-        } catch (SQLException sqle) {
-            handleException(failureMsg, sqle);
-        }
-        return people;
-    }
 
     /**
      * Commits the current transaction.
@@ -133,8 +111,8 @@ public class SchoolDAO {
 
     private PreparedStatement findAllInstrument(String type) throws SQLException {
         return connection.prepareStatement(
-                "SELECT id, price, brand, quality " +
-                "FROM rentable_instruments as t1 " +
+                "SELECT t1.id, price, brand, quality " +
+                "FROM rentable_instrument as t1 " +
                 "LEFT JOIN lease AS t2 ON t2.id = t1.lease_id " +
                 "WHERE t2.id IS NULL AND type ='" + type + "'");
     }
