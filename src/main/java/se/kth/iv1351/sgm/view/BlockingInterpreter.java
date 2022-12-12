@@ -85,6 +85,12 @@ public class BlockingInterpreter {
                            System.out.println(instrument);
                         }
                         break;
+                    case RENT:
+                        ctrl.rent(
+                                Integer.parseInt(cmdLine.getParameter(0)),
+                                Integer.parseInt(cmdLine.getParameter(1)),
+                                cmdLine.getParameter(2));
+                        break;
                     case TERMINATE:
                         ctrl.terminate(Integer.parseInt(cmdLine.getParameter(0)));
                         break;

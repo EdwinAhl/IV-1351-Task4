@@ -59,13 +59,22 @@ public class Controller {
         }
     }
 
+    // Adds lease
+    public void rent(int student_id, int instrument_id, String end_day) throws AccountException {
+        try {
+            schoolDb.rent(student_id, instrument_id, end_day);
+        } catch (Exception e) {
+            throw new AccountException("Unable to rent.", e);
+        }
+    }
+
     // Terminates rental
     public void terminate(int lease_id) throws AccountException {
         try{
             schoolDb.terminate(lease_id);
             System.out.println("Terminated lease_id " + lease_id);
         } catch (Exception e) {
-            throw new AccountException("Unable to terminate lease_id " + lease_id, e);
+            throw new AccountException("Unable to terminate lease.", e);
         }
     }
 

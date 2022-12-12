@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.kth.iv1351.sgm.model.Instrument;
-import se.kth.iv1351.sgm.model.Person;
 
 /**
  * This data access object (DAO) encapsulates all database calls in the bank
@@ -63,6 +62,7 @@ public class SchoolDAO {
         }
     }
 
+    // Returns list of all rentable_instruments not in lease
     public List<Instrument> getInstruments(String type) throws SchoolDBException {
         String failureMsg = "Could not list instruments.";
         List<Instrument> instruments = new ArrayList<>();
@@ -82,11 +82,25 @@ public class SchoolDAO {
         return instruments;
     }
 
+    // Adds lease
+    public void rent(int student_id, int instrument_id, String end_day) throws SchoolDBException {
+        String failureMsg = "Could not add lease.";
+        try{
+            /**
+             * Need to create lease first and somehow get it's generated id before using other methods
+             */
+            connection.commit();
+        } catch (SQLException sqle) {
+            handleException(failureMsg, sqle);
+        }
+    }
+
+    // Terminates lease
     public void terminate(int lease_id) throws SchoolDBException {
         String failureMsg = "Could not terminate rental.";
         try{
             updateLease(lease_id);
-            updateInstrument(lease_id);
+            updateInstrumentFromLease(lease_id);
             connection.commit();
         } catch (SQLException sqle) {
             handleException(failureMsg, sqle);
@@ -117,6 +131,7 @@ public class SchoolDAO {
         //findAllPeopleStatement = connection.prepareStatement("SELECT * FROM PERSON");
     }
 
+    // Selects all instruments of given type
     private PreparedStatement findAllInstrument(String type) throws SQLException {
         return connection.prepareStatement(
                 "SELECT t1.id, price, brand, quality " +
@@ -125,6 +140,32 @@ public class SchoolDAO {
                     "WHERE t2.id IS NULL AND type ='" + type + "'");
     }
 
+    // Select counts all rentals from a given student
+    private PreparedStatement countRentals(int student_id) throws SQLException {
+        return connection.prepareStatement(
+                    "SELECT COUNT(*) " +
+                        "FROM student as t1 JOIN lease as t2 " +
+                        "ON t1.id = t2.student_id " +
+                        "WHERE t1.id = " + student_id);
+    }
+
+    // Inserts a lease
+    private PreparedStatement insertLease(int student_id, String end_day) throws SQLException {
+        return connection.prepareStatement(
+                "INSERT INTO lease(student_id, start_day, end_day) " +
+                        "VALUES " +
+                        "(" + student_id + ", " + "CURRENT_DATE" + ", '" + end_day + "')");
+    }
+
+    // Adds lease to instrument
+    private PreparedStatement updateInstrumentToLease(int instrument_id, int lease_id) throws SQLException {
+        return connection.prepareStatement(
+                "UPDATE rentable_instrument" +
+                        "SET lease_id = " + lease_id +
+                        "WHERE id = " + instrument_id);
+    }
+
+    // Updates lease to set end_day as current day, meaning terminated
     private PreparedStatement updateLease(int lease_id) throws SQLException {
         return connection.prepareStatement(
               "UPDATE lease " +
@@ -132,7 +173,8 @@ public class SchoolDAO {
                   "WHERE id = " + lease_id);
     }
 
-    private PreparedStatement updateInstrument(int lease_id) throws SQLException {
+    // Removes lease from instrument so it is rentable again
+    private PreparedStatement updateInstrumentFromLease(int lease_id) throws SQLException {
         return connection.prepareStatement(
                     "UPDATE rentable_instrument " +
                         "SET lease_id = null " +

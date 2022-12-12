@@ -32,6 +32,9 @@ public enum Command {
     // List all rentable_instruments
     LIST,
 
+    // Rent instrument
+    RENT,
+
     // Terminate rental
     TERMINATE,
 
