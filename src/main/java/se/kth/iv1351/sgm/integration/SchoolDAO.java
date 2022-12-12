@@ -49,7 +49,7 @@ public class SchoolDAO {
 //    private static final String HOLDER_FK_COLUMN_NAME = HOLDER_PK_COLUMN_NAME;
 
     private Connection connection;
-    private PreparedStatement findAllPeopleStatement;
+    //private PreparedStatement findAllPeopleStatement;
 
     /**
      * Constructs a new DAO object connected to the bank database.
@@ -82,6 +82,16 @@ public class SchoolDAO {
         return instruments;
     }
 
+    public void terminate(int lease_id) throws SchoolDBException {
+        String failureMsg = "Could not terminate rental.";
+        try{
+            updateLease(lease_id);
+            updateInstrument(lease_id);
+            connection.commit();
+        } catch (SQLException sqle) {
+            handleException(failureMsg, sqle);
+        }
+    }
 
     /**
      * Commits the current transaction.
@@ -100,23 +110,34 @@ public class SchoolDAO {
     private void connectToBankDB() throws ClassNotFoundException, SQLException {
         connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/sgm",
                                                  "postgres", "post");
-        // connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bankdb",
-        //                                          "mysql", "mysql");
         connection.setAutoCommit(false);
     }
 
     private void prepareStatements() throws SQLException {
-        findAllPeopleStatement = connection.prepareStatement("SELECT * FROM PERSON");
+        //findAllPeopleStatement = connection.prepareStatement("SELECT * FROM PERSON");
     }
 
     private PreparedStatement findAllInstrument(String type) throws SQLException {
         return connection.prepareStatement(
                 "SELECT t1.id, price, brand, quality " +
-                "FROM rentable_instrument as t1 " +
-                "LEFT JOIN lease AS t2 ON t2.id = t1.lease_id " +
-                "WHERE t2.id IS NULL AND type ='" + type + "'");
+                    "FROM rentable_instrument as t1 " +
+                    "LEFT JOIN lease AS t2 ON t2.id = t1.lease_id " +
+                    "WHERE t2.id IS NULL AND type ='" + type + "'");
     }
 
+    private PreparedStatement updateLease(int lease_id) throws SQLException {
+        return connection.prepareStatement(
+              "UPDATE lease " +
+                  "SET end_day = CURRENT_DAY " +
+                  "WHERE id = " + lease_id);
+    }
+
+    private PreparedStatement updateInstrument(int lease_id) throws SQLException {
+        return connection.prepareStatement(
+                    "UPDATE rentable_instrument " +
+                        "SET lease_id = null " +
+                        "WHERE lease_id = " + lease_id);
+    }
 
     private void handleException(String failureMsg, Exception cause) throws SchoolDBException {
         String completeFailureMsg = failureMsg;

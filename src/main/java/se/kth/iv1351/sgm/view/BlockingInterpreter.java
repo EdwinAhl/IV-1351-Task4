@@ -85,6 +85,9 @@ public class BlockingInterpreter {
                            System.out.println(instrument);
                         }
                         break;
+                    case TERMINATE:
+                        ctrl.terminate(Integer.parseInt(cmdLine.getParameter(0)));
+                        break;
                     default:
                         System.out.println("illegal command");
                 }

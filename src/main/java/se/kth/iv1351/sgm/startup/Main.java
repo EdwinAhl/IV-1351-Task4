@@ -29,7 +29,7 @@ import se.kth.iv1351.sgm.integration.SchoolDBException;
 import se.kth.iv1351.sgm.view.BlockingInterpreter;
 
 /**
- * Starts the bank client.
+ * Starts the renting client.
  */
 public class Main {
     /**

@@ -50,11 +50,22 @@ public class Controller {
     }
 
 
+    // Lists all rentable_instruments
     public List<? extends InstrumentDTO> getInstruments(String type) throws AccountException {
         try {
             return schoolDb.getInstruments(type);
         } catch (Exception e) {
             throw new AccountException("Unable to list instruments.", e);
+        }
+    }
+
+    // Terminates rental
+    public void terminate(int lease_id) throws AccountException {
+        try{
+            schoolDb.terminate(lease_id);
+            System.out.println("Terminated lease_id " + lease_id);
+        } catch (Exception e) {
+            throw new AccountException("Unable to terminate lease_id " + lease_id, e);
         }
     }
 
