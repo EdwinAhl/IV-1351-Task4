@@ -28,7 +28,7 @@ import java.util.List;
 import se.kth.iv1351.sgm.integration.SchoolDAO;
 import se.kth.iv1351.sgm.integration.SchoolDBException;
 import se.kth.iv1351.sgm.model.InstrumentDTO;
-import se.kth.iv1351.sgm.model.AccountException;
+import se.kth.iv1351.sgm.model.InstrumentStockException;
 import se.kth.iv1351.sgm.model.RentalException;
 
 /**
@@ -50,12 +50,14 @@ public class Controller {
     }
 
 
-    // Lists all rentable_instruments
-    public List<? extends InstrumentDTO> getInstruments(String type) throws AccountException {
+    /**
+     * Lists all rentable_instruments
+     **/
+    public List<? extends InstrumentDTO> getInstruments(String type) throws InstrumentStockException {
         try {
             return schoolDb.getInstruments(type);
         } catch (Exception e) {
-            throw new AccountException("Unable to list instruments.", e);
+            throw new InstrumentStockException("Unable to list instruments.", e);
         }
     }
 
@@ -73,12 +75,12 @@ public class Controller {
     }
 
     // Terminates rental
-    public void terminateRental(int lease_id) throws AccountException {
+    public void terminateRental(int lease_id) throws RentalException {
         try {
             schoolDb.terminateRental(lease_id);
             System.out.println("Terminated lease_id " + lease_id);
         } catch (Exception e) {
-            throw new AccountException("Unable to terminate lease.", e);
+            throw new RentalException("Unable to terminate lease.", e);
         }
     }
 
@@ -112,11 +114,11 @@ public class Controller {
 //    }
 
 
-    private void commitOngoingTransaction(String failureMsg) throws AccountException {
+    private void commitOngoingTransaction(String failureMsg) throws InstrumentStockException {
         try {
             schoolDb.commit();
         } catch (SchoolDBException bdbe) {
-            throw new AccountException(failureMsg, bdbe);
+            throw new InstrumentStockException(failureMsg, bdbe);
         }
     }
 }

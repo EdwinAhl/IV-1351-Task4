@@ -113,8 +113,11 @@ public class SchoolDAO {
         }
     }
 
-    // Terminates lease
+    /**
+     * Terminates the lease by setting the end date to today and removing the rental from the instrument
+     **/
     public void terminateRental(int lease_id) throws SchoolDBException {
+        // TODO this does not save which instrument was rented!
         String failureMsg = "Could not terminate rental.";
         try {
             getLeaseTerminationQuery(lease_id).executeUpdate();

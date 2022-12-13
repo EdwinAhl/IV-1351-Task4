@@ -1,5 +1,9 @@
 package se.kth.iv1351.sgm.model;
 
+
+/**
+ * Thrown when create, read or delete of a rental fails.
+ */
 public class RentalException extends Exception {
     /**
      * Create a new instance thrown because of the specified reason.
