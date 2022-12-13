@@ -84,36 +84,6 @@ public class Controller {
         }
     }
 
-
-//    /**
-//     * Withdraws the specified amount from the account with the specified account
-//     * number.
-//     *
-//     * @param acctNo The number of the account from which to withdraw.
-//     * @param amt    The amount to withdraw.
-//     * @throws RejectedException If not allowed to withdraw the specified amount.
-//     * @throws AccountException  If failed to withdraw.
-//     */
-//    public void withdraw(String acctNo, int amt) throws RejectedException, AccountException {
-//        String failureMsg = "Could not withdraw from account: " + acctNo;
-//
-//        if (acctNo == null) {
-//            throw new AccountException(failureMsg);
-//        }
-//
-//        try {
-//            Account acct = bankDb.findAccountByAcctNo(acctNo, true);
-//            acct.withdraw(amt);
-//            bankDb.updateAccount(acct);
-//        } catch (BankDBException bdbe) {
-//            throw new AccountException(failureMsg, bdbe);
-//        } catch (Exception e) {
-//            commitOngoingTransaction(failureMsg);
-//            throw e;
-//        }
-//    }
-
-
     private void commitOngoingTransaction(String failureMsg) throws InstrumentStockException {
         try {
             schoolDb.commit();

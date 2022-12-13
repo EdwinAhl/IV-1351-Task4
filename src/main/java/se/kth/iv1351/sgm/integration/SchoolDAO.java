@@ -34,18 +34,17 @@ import java.util.List;
 import se.kth.iv1351.sgm.model.Instrument;
 
 /**
- * This data access object (DAO) encapsulates all database calls in the bank
+ * This data access object (DAO) encapsulates all database calls in the school
  * application. No code outside this class shall have any knowledge about the
  * database.
  */
 public class SchoolDAO {
-//    private static final String HOLDER_TABLE_NAME = "holder";
-//    private static final String HOLDER_PK_COLUMN_NAME = "holder_id";
-//    private static final String HOLDER_COLUMN_NAME = "name";
-//    private static final String ACCT_TABLE_NAME = "account";
-//    private static final String ACCT_NO_COLUMN_NAME = "account_no";
-//    private static final String BALANCE_COLUMN_NAME = "balance";
-//    private static final String HOLDER_FK_COLUMN_NAME = HOLDER_PK_COLUMN_NAME;
+    private static final String INSTRUMENT_COLUMN_ID = "id";
+    private static final String INSTRUMENT_COLUMN_PRICE = "price";
+    private static final String INSTRUMENT_COLUMN_BRAND = "brand";
+    private static final String INSTRUMENT_COLUMN_QUALITY = "quality";
+    private static final String COLUMN_COUNT = "count";
+    private static final String LEASE_COLUMN_ID = "id";
 
     private Connection connection;
     //private PreparedStatement findAllPeopleStatement;
@@ -72,11 +71,11 @@ public class SchoolDAO {
         try (ResultSet result = getFindAllInstrumentsQuery(type).executeQuery()) {
             while (result.next()) {
                 instruments.add(new Instrument(
-                        result.getInt("id"),
-                        result.getInt("price"),
+                        result.getInt(INSTRUMENT_COLUMN_ID),
+                        result.getInt(INSTRUMENT_COLUMN_PRICE),
                         type,
-                        result.getString("brand"),
-                        result.getString("quality")));
+                        result.getString(INSTRUMENT_COLUMN_BRAND),
+                        result.getString(INSTRUMENT_COLUMN_QUALITY)));
             }
             connection.commit();
         } catch (SQLException sqlException) {
@@ -90,7 +89,7 @@ public class SchoolDAO {
 
         ResultSet countResult = getStudentRentalsCountQuery(studentId).executeQuery();
         countResult.next();
-        int count = countResult.getInt("count");
+        int count = countResult.getInt(COLUMN_COUNT);
         closeResultSet(failureMsg, countResult);
 
         return count;
@@ -98,15 +97,15 @@ public class SchoolDAO {
 
 
     // Adds lease
-    public void createRental(int student_id, int instrument_id, String end_day) throws SchoolDBException {
+    public void createRental(int studentId, int instrumentId, String endDay) throws SchoolDBException {
         String failureMsg = "Could not add lease.";
         try {
-            ResultSet leaseResult = getLeaseCreatorQuery(student_id, end_day).executeQuery();
+            ResultSet leaseResult = getLeaseCreatorQuery(studentId, endDay).executeQuery();
             leaseResult.next();
-            int lease_id = leaseResult.getInt("id");  // Create lease and return generated id
+            int leaseId = leaseResult.getInt(LEASE_COLUMN_ID);  // Create lease and return generated id
             closeResultSet(failureMsg, leaseResult);
 
-            getInstrumentLeaseUpdateQuery(instrument_id, lease_id).executeUpdate();  // Add lease_id to instrument
+            getInstrumentLeaseUpdateQuery(instrumentId, leaseId).executeUpdate();  // Add leaseId to instrument
             connection.commit();
         } catch (SQLException sqlException) {
             handleException(failureMsg, sqlException);
@@ -116,12 +115,12 @@ public class SchoolDAO {
     /**
      * Terminates the lease by setting the end date to today and removing the rental from the instrument
      **/
-    public void terminateRental(int lease_id) throws SchoolDBException {
+    public void terminateRental(int leaseId) throws SchoolDBException {
         // TODO this does not save which instrument was rented!
         String failureMsg = "Could not terminate rental.";
         try {
-            getLeaseTerminationQuery(lease_id).executeUpdate();
-            getInstrumentLeaseUpdateQuery(null, lease_id).executeUpdate();
+            getLeaseTerminationQuery(leaseId).executeUpdate();
+            getInstrumentLeaseUpdateQuery(null, leaseId).executeUpdate();
             connection.commit();
         } catch (SQLException sqlException) {
             handleException(failureMsg, sqlException);
@@ -157,7 +156,7 @@ public class SchoolDAO {
      */
     private PreparedStatement getFindAllInstrumentsQuery(String type) throws SQLException {
         return connection.prepareStatement(
-                "SELECT t1.id, price, brand, quality " +
+                "SELECT t1." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " + INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + " " +
                         "FROM rentable_instrument as t1 " +
                         "LEFT JOIN lease AS t2 ON t2.id = t1.lease_id " +
                         "WHERE t2.id IS NULL AND type ='" + type + "'");
@@ -166,45 +165,45 @@ public class SchoolDAO {
     /**
      * Select counts all rentals from a given student
      */
-    private PreparedStatement getStudentRentalsCountQuery(int student_id) throws SQLException {
+    private PreparedStatement getStudentRentalsCountQuery(int studentId) throws SQLException {
         return connection.prepareStatement(
                 "SELECT COUNT(*) " +
                         "FROM student as t1 JOIN lease as t2 " +
                         "ON t1.id = t2.student_id " +
-                        "WHERE t1.id = " + student_id);
+                        "WHERE t1.id = " + studentId);
     }
 
     /**
      * Creates a lease starting at the current date and ending at the specified end date
      **/
-    private PreparedStatement getLeaseCreatorQuery(int student_id, String end_day) throws SQLException {
+    private PreparedStatement getLeaseCreatorQuery(int studentId, String endDay) throws SQLException {
         return connection.prepareStatement(
                 "INSERT INTO lease(student_id, start_day, end_day) " +
                         "VALUES " +
-                        "(" + student_id + ", " + "CURRENT_DATE" + ", '" + end_day + "')" +
-                        "RETURNING id");
+                        "(" + studentId + ", " + "CURRENT_DATE" + ", '" + endDay + "')" +
+                        "RETURNING " + LEASE_COLUMN_ID);
     }
 
     /**
      * Adds lease to instrument
      *
-     * @param instrument_id is an integer to allow for setting null, e.g. removing a rental.
+     * @param instrumentId is an integer to allow for setting null, e.g. removing a rental.
      **/
-    private PreparedStatement getInstrumentLeaseUpdateQuery(Integer instrument_id, int lease_id) throws SQLException {
+    private PreparedStatement getInstrumentLeaseUpdateQuery(Integer instrumentId, int leaseId) throws SQLException {
         return connection.prepareStatement(
                 "UPDATE rentable_instrument " +
-                        "SET lease_id = " + lease_id + " " +
-                        "WHERE id = " + instrument_id);
+                        "SET lease_id = " + leaseId + " " +
+                        "WHERE " + LEASE_COLUMN_ID + " = " + instrumentId);
     }
 
     /**
      * Updates lease to set end_day as current day, meaning terminated
      **/
-    private PreparedStatement getLeaseTerminationQuery(int lease_id) throws SQLException {
+    private PreparedStatement getLeaseTerminationQuery(int leaseId) throws SQLException {
         return connection.prepareStatement(
                 "UPDATE lease " +
                         "SET end_day = CURRENT_DAY " +
-                        "WHERE id = " + lease_id);
+                        "WHERE id = " + leaseId);
     }
 
     private void handleException(String failureMsg, Exception cause) throws SchoolDBException {
