@@ -86,10 +86,15 @@ public class SchoolDAO {
     public void rent(int student_id, int instrument_id, String end_day) throws SchoolDBException {
         String failureMsg = "Could not add lease.";
         try{
-            /**
-             * Need to create lease first and somehow get it's generated id before using other methods
-             */
-            connection.commit();
+            ResultSet countResult = countRentals(student_id).executeQuery();
+            countResult.next();
+            if(countResult.getInt("count") < 2){  // Student has <2 leases
+                ResultSet leaseResult =  insertLease(student_id, end_day).executeQuery();
+                leaseResult.next();
+                int lease_id = leaseResult.getInt("id");  // Create lease and return generated id
+                updateInstrumentToLease(instrument_id, lease_id);  // Add lease_id to instrument
+                connection.commit();
+            }
         } catch (SQLException sqle) {
             handleException(failureMsg, sqle);
         }
@@ -152,16 +157,21 @@ public class SchoolDAO {
     // Inserts a lease
     private PreparedStatement insertLease(int student_id, String end_day) throws SQLException {
         return connection.prepareStatement(
-                "INSERT INTO lease(student_id, start_day, end_day) " +
+                    "INSERT INTO lease(student_id, start_day, end_day) " +
                         "VALUES " +
-                        "(" + student_id + ", " + "CURRENT_DATE" + ", '" + end_day + "')");
+                        "(" + student_id + ", " + "CURRENT_DATE" + ", '" + end_day + "')" +
+                        "RETURNING id");
     }
 
     // Adds lease to instrument
     private PreparedStatement updateInstrumentToLease(int instrument_id, int lease_id) throws SQLException {
+        System.out.println(
+                "UPDATE rentable_instrument " +
+                        "SET lease_id = " + lease_id + " " +
+                        "WHERE id = " + instrument_id);
         return connection.prepareStatement(
-                "UPDATE rentable_instrument" +
-                        "SET lease_id = " + lease_id +
+                    "UPDATE rentable_instrument " +
+                        "SET lease_id = " + lease_id + " " +
                         "WHERE id = " + instrument_id);
     }
 
