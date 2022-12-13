@@ -62,11 +62,14 @@ public class SchoolDAO {
         }
     }
 
-    // Returns list of all rentable_instruments not in lease
+    /**
+     * @return A list of all rentable_instruments (not currently leased)
+     */
     public List<Instrument> getInstruments(String type) throws SchoolDBException {
         String failureMsg = "Could not list instruments.";
         List<Instrument> instruments = new ArrayList<>();
-        try (ResultSet result = findAllInstrument(type).executeQuery()) {
+
+        try (ResultSet result = getFindAllInstrumentsQuery(type).executeQuery()) {
             while (result.next()) {
                 instruments.add(new Instrument(
                         result.getInt("id"),
@@ -76,47 +79,57 @@ public class SchoolDAO {
                         result.getString("quality")));
             }
             connection.commit();
-        } catch (SQLException sqle) {
-            handleException(failureMsg, sqle);
+        } catch (SQLException sqlException) {
+            handleException(failureMsg, sqlException);
         }
         return instruments;
     }
 
+    public int getStudentRentalCount(int studentId) throws SQLException, SchoolDBException {
+        String failureMsg = "Could not get student rental count.";
+
+        ResultSet countResult = getStudentRentalsCountQuery(studentId).executeQuery();
+        countResult.next();
+        int count = countResult.getInt("count");
+        closeResultSet(failureMsg, countResult);
+
+        return count;
+    }
+
+
     // Adds lease
-    public void rent(int student_id, int instrument_id, String end_day) throws SchoolDBException {
+    public void createRental(int student_id, int instrument_id, String end_day) throws SchoolDBException {
         String failureMsg = "Could not add lease.";
-        try{
-            ResultSet countResult = countRentals(student_id).executeQuery();
-            countResult.next();
-            if(countResult.getInt("count") < 2){  // Student has <2 leases
-                ResultSet leaseResult =  insertLease(student_id, end_day).executeQuery();
-                leaseResult.next();
-                int lease_id = leaseResult.getInt("id");  // Create lease and return generated id
-                updateInstrumentToLease(instrument_id, lease_id);  // Add lease_id to instrument
-                connection.commit();
-            }
-        } catch (SQLException sqle) {
-            handleException(failureMsg, sqle);
+        try {
+            ResultSet leaseResult = getLeaseCreatorQuery(student_id, end_day).executeQuery();
+            leaseResult.next();
+            int lease_id = leaseResult.getInt("id");  // Create lease and return generated id
+            closeResultSet(failureMsg, leaseResult);
+
+            getInstrumentLeaseUpdateQuery(instrument_id, lease_id).executeUpdate();  // Add lease_id to instrument
+            connection.commit();
+        } catch (SQLException sqlException) {
+            handleException(failureMsg, sqlException);
         }
     }
 
     // Terminates lease
-    public void terminate(int lease_id) throws SchoolDBException {
+    public void terminateRental(int lease_id) throws SchoolDBException {
         String failureMsg = "Could not terminate rental.";
-        try{
-            updateLease(lease_id);
-            updateInstrumentFromLease(lease_id);
+        try {
+            getLeaseTerminationQuery(lease_id).executeUpdate();
+            getInstrumentLeaseUpdateQuery(null, lease_id).executeUpdate();
             connection.commit();
-        } catch (SQLException sqle) {
-            handleException(failureMsg, sqle);
+        } catch (SQLException sqlException) {
+            handleException(failureMsg, sqlException);
         }
     }
 
     /**
      * Commits the current transaction.
-     * 
+     *
      * @throws SchoolDBException If unable to commit the current transaction.
-     * Will roll back transactions if errored
+     *                           Will roll back transactions if errored
      */
     public void commit() throws SchoolDBException {
         try {
@@ -128,7 +141,7 @@ public class SchoolDAO {
 
     private void connectToBankDB() throws ClassNotFoundException, SQLException {
         connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/sgm",
-                                                 "postgres", "post");
+                "postgres", "post");
         connection.setAutoCommit(false);
     }
 
@@ -136,59 +149,59 @@ public class SchoolDAO {
         //findAllPeopleStatement = connection.prepareStatement("SELECT * FROM PERSON");
     }
 
-    // Selects all instruments of given type
-    private PreparedStatement findAllInstrument(String type) throws SQLException {
+    /**
+     * Selects all instruments of given type
+     */
+    private PreparedStatement getFindAllInstrumentsQuery(String type) throws SQLException {
         return connection.prepareStatement(
                 "SELECT t1.id, price, brand, quality " +
-                    "FROM rentable_instrument as t1 " +
-                    "LEFT JOIN lease AS t2 ON t2.id = t1.lease_id " +
-                    "WHERE t2.id IS NULL AND type ='" + type + "'");
+                        "FROM rentable_instrument as t1 " +
+                        "LEFT JOIN lease AS t2 ON t2.id = t1.lease_id " +
+                        "WHERE t2.id IS NULL AND type ='" + type + "'");
     }
 
-    // Select counts all rentals from a given student
-    private PreparedStatement countRentals(int student_id) throws SQLException {
+    /**
+     * Select counts all rentals from a given student
+     */
+    private PreparedStatement getStudentRentalsCountQuery(int student_id) throws SQLException {
         return connection.prepareStatement(
-                    "SELECT COUNT(*) " +
+                "SELECT COUNT(*) " +
                         "FROM student as t1 JOIN lease as t2 " +
                         "ON t1.id = t2.student_id " +
                         "WHERE t1.id = " + student_id);
     }
 
-    // Inserts a lease
-    private PreparedStatement insertLease(int student_id, String end_day) throws SQLException {
+    /**
+     * Creates a lease starting at the current date and ending at the specified end date
+     **/
+    private PreparedStatement getLeaseCreatorQuery(int student_id, String end_day) throws SQLException {
         return connection.prepareStatement(
-                    "INSERT INTO lease(student_id, start_day, end_day) " +
+                "INSERT INTO lease(student_id, start_day, end_day) " +
                         "VALUES " +
                         "(" + student_id + ", " + "CURRENT_DATE" + ", '" + end_day + "')" +
                         "RETURNING id");
     }
 
-    // Adds lease to instrument
-    private PreparedStatement updateInstrumentToLease(int instrument_id, int lease_id) throws SQLException {
-        System.out.println(
+    /**
+     * Adds lease to instrument
+     *
+     * @param instrument_id is an integer to allow for setting null, e.g. removing a rental.
+     **/
+    private PreparedStatement getInstrumentLeaseUpdateQuery(Integer instrument_id, int lease_id) throws SQLException {
+        return connection.prepareStatement(
                 "UPDATE rentable_instrument " +
                         "SET lease_id = " + lease_id + " " +
                         "WHERE id = " + instrument_id);
-        return connection.prepareStatement(
-                    "UPDATE rentable_instrument " +
-                        "SET lease_id = " + lease_id + " " +
-                        "WHERE id = " + instrument_id);
     }
 
-    // Updates lease to set end_day as current day, meaning terminated
-    private PreparedStatement updateLease(int lease_id) throws SQLException {
+    /**
+     * Updates lease to set end_day as current day, meaning terminated
+     **/
+    private PreparedStatement getLeaseTerminationQuery(int lease_id) throws SQLException {
         return connection.prepareStatement(
-              "UPDATE lease " +
-                  "SET end_day = CURRENT_DAY " +
-                  "WHERE id = " + lease_id);
-    }
-
-    // Removes lease from instrument so it is rentable again
-    private PreparedStatement updateInstrumentFromLease(int lease_id) throws SQLException {
-        return connection.prepareStatement(
-                    "UPDATE rentable_instrument " +
-                        "SET lease_id = null " +
-                        "WHERE lease_id = " + lease_id);
+                "UPDATE lease " +
+                        "SET end_day = CURRENT_DAY " +
+                        "WHERE id = " + lease_id);
     }
 
     private void handleException(String failureMsg, Exception cause) throws SchoolDBException {
@@ -196,14 +209,14 @@ public class SchoolDAO {
         try {
             connection.rollback();
         } catch (SQLException rollbackExc) {
-            completeFailureMsg = completeFailureMsg + 
-            ". Also failed to rollback transaction because of: " + rollbackExc.getMessage();
+            completeFailureMsg = completeFailureMsg +
+                    ". Also failed to rollback transaction because of: " + rollbackExc.getMessage();
         }
 
         if (cause != null) {
-            throw new SchoolDBException(failureMsg, cause);
+            throw new SchoolDBException(completeFailureMsg, cause);
         } else {
-            throw new SchoolDBException(failureMsg);
+            throw new SchoolDBException(completeFailureMsg);
         }
     }
 

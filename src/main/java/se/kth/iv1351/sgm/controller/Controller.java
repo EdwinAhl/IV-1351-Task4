@@ -28,8 +28,8 @@ import java.util.List;
 import se.kth.iv1351.sgm.integration.SchoolDAO;
 import se.kth.iv1351.sgm.integration.SchoolDBException;
 import se.kth.iv1351.sgm.model.InstrumentDTO;
-import se.kth.iv1351.sgm.model.PersonDTO;
 import se.kth.iv1351.sgm.model.AccountException;
+import se.kth.iv1351.sgm.model.RentalException;
 
 /**
  * This is the application's only controller, all calls to the model pass here.
@@ -42,7 +42,7 @@ public class Controller {
 
     /**
      * Creates a new instance, and retrieves a connection to the database.
-     * 
+     *
      * @throws SchoolDBException If unable to connect to the database.
      */
     public Controller() throws SchoolDBException {
@@ -60,18 +60,22 @@ public class Controller {
     }
 
     // Adds lease
-    public void rent(int student_id, int instrument_id, String end_day) throws AccountException {
+    public void createRental(int student_id, int instrument_id, String end_day) throws RentalException {
         try {
-            schoolDb.rent(student_id, instrument_id, end_day);
+            int countResult = schoolDb.getStudentRentalCount(student_id);
+            if (countResult > 2)
+                throw new RentalException("Student cannot have more than 2 rentals simultaneously");
+
+            schoolDb.createRental(student_id, instrument_id, end_day);
         } catch (Exception e) {
-            throw new AccountException("Unable to rent.", e);
+            throw new RentalException("Unable to rent.", e);
         }
     }
 
     // Terminates rental
-    public void terminate(int lease_id) throws AccountException {
-        try{
-            schoolDb.terminate(lease_id);
+    public void terminateRental(int lease_id) throws AccountException {
+        try {
+            schoolDb.terminateRental(lease_id);
             System.out.println("Terminated lease_id " + lease_id);
         } catch (Exception e) {
             throw new AccountException("Unable to terminate lease.", e);

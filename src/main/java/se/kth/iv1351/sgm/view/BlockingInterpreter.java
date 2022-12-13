@@ -29,7 +29,6 @@ import java.util.Scanner;
 
 import se.kth.iv1351.sgm.controller.Controller;
 import se.kth.iv1351.sgm.model.InstrumentDTO;
-import se.kth.iv1351.sgm.model.PersonDTO;
 
 /**
  * Reads and interprets user commands. This command interpreter is blocking, the user
@@ -86,13 +85,13 @@ public class BlockingInterpreter {
                         }
                         break;
                     case RENT:
-                        ctrl.rent(
+                        ctrl.createRental(
                                 Integer.parseInt(cmdLine.getParameter(0)),
                                 Integer.parseInt(cmdLine.getParameter(1)),
                                 cmdLine.getParameter(2));
                         break;
                     case TERMINATE:
-                        ctrl.terminate(Integer.parseInt(cmdLine.getParameter(0)));
+                        ctrl.terminateRental(Integer.parseInt(cmdLine.getParameter(0)));
                         break;
                     default:
                         System.out.println("illegal command");
