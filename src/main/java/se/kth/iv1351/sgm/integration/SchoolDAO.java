@@ -86,6 +86,7 @@ public class SchoolDAO {
 
     public int getStudentRentalCount(int studentId) throws SQLException, SchoolDBException {
         String failureMsg = "Could not get student rental count.";
+        getLeaseLockQuery(studentId).execute();
 
         ResultSet countResult = getStudentRentalsCountQuery(studentId).executeQuery();
         countResult.next();
@@ -163,6 +164,17 @@ public class SchoolDAO {
     }
 
     /**
+     * Locks leases
+     */
+    private PreparedStatement getLeaseLockQuery(int studentId) throws SQLException {
+        return connection.prepareStatement(
+                // Since the lease rows for this student should not be accessed by
+                // other queries at the same time a SELECT FOR UPDATE is used.
+                // If the leases were not locked then a student may be able to end up with more than allowed rentals.
+                "SELECT * FROM lease WHERE student_id = '" + studentId + "' FOR UPDATE");
+    }
+
+    /**
      * Select counts all rentals from a given student
      */
     private PreparedStatement getStudentRentalsCountQuery(int studentId) throws SQLException {
@@ -202,7 +214,7 @@ public class SchoolDAO {
     private PreparedStatement getLeaseTerminationQuery(int leaseId) throws SQLException {
         return connection.prepareStatement(
                 "UPDATE lease " +
-                        "SET end_day = CURRENT_DAY " +
+                        "SET end_day = CURRENT_DATE " +
                         "WHERE id = " + leaseId);
     }
 
