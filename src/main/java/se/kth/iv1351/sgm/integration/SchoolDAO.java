@@ -41,6 +41,7 @@ public class SchoolDAO {
     private static final String INSTRUMENT_COLUMN_QUALITY = "quality";
     private static final String INSTRUMENT_COLUMN_TYPE = "type";
     private static final String COLUMN_COUNT = "count";
+    private static final String COLUMN_IS_EMPTY = "is_empty";
     private static final String LEASE_COLUMN_ID = "id";
     private static final String LEASE_COLUMN_STUDENT_ID = "student_id";
     private static final String LEASE_COLUMN_INSTRUMENT_ID = "instrument_id";
@@ -103,10 +104,9 @@ public class SchoolDAO {
     public boolean readCanRentInstrument(int instrumentId) throws SchoolDBException {
         String failureMsg = "Could not read instrument rented status.";
         boolean canRentInstrument = false;
-        try {
-            PreparedStatement query = getCountRentedInstrumentsQuery(instrumentId, null);
-            // TODO THIS MAY COUNT AS LOGIC!
-            canRentInstrument = getQueryRowCount(query) == 0;
+        try (ResultSet rentedInstrumentsResults = getCountRentedInstrumentsQuery(instrumentId, null).executeQuery()) {
+            rentedInstrumentsResults.next();
+            canRentInstrument = rentedInstrumentsResults.getBoolean(COLUMN_IS_EMPTY);
         } catch (SQLException sqlException) {
             handleException(failureMsg, sqlException);
         }
@@ -177,7 +177,7 @@ public class SchoolDAO {
      * If any argument is null it will not be part of the query
      */
     private PreparedStatement getCountRentedInstrumentsQuery(Integer instrumentId, Integer studentId) throws SQLException {
-        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM rentable_instrument AS r " +
+        StringBuilder sb = new StringBuilder("SELECT COUNT(*), COUNT(*)=0 as " + COLUMN_IS_EMPTY + " FROM rentable_instrument AS r " +
                 "JOIN lease AS l ON r.id=instrument_id " +
                 // If current date is higher than start day and lower than end day
                 "WHERE (CURRENT_DATE >= l.start_day AND CURRENT_DATE < l.end_day)");
@@ -196,6 +196,7 @@ public class SchoolDAO {
         }
         return connection.prepareStatement(sb.toString());
     }
+
 
     private int getQueryRowCount(PreparedStatement preparedStatement) throws SQLException {
         ResultSet countResult = preparedStatement.executeQuery();
