@@ -180,7 +180,7 @@ public class SchoolDAO {
         StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM rentable_instrument AS r " +
                 "JOIN lease AS l ON r.id=instrument_id " +
                 // If current date is higher than start day and lower than end day
-                "WHERE (CURRENT_DATE => l.start_day AND CURRENT_DATE < l.end_day)");
+                "WHERE (CURRENT_DATE >= l.start_day AND CURRENT_DATE < l.end_day)");
 
         if (instrumentId != null) {
             sb.append(" AND r.");
