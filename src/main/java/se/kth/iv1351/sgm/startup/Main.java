@@ -39,7 +39,7 @@ public class Main {
         try {
         new BlockingInterpreter(new Controller()).handleCmds();
         } catch(SchoolDBException bdbe) {
-            System.out.println("Could not connect to Bank db.");
+            System.out.println("Could not connect to School db.");
             bdbe.printStackTrace();
         }
     }

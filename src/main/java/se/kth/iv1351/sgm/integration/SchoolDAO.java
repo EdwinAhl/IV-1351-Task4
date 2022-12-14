@@ -65,10 +65,7 @@ public class SchoolDAO {
     public List<Instrument> readRentableInstruments(String type) throws SchoolDBException {
         String failureMsg = "Could not list instruments.";
         List<Instrument> instruments = new ArrayList<>();
-
-        try (ResultSet result =
-                     getFindAllRentableInstrumentsQuery(type).executeQuery()) {
-
+        try (ResultSet result = getFindAllRentableInstrumentsQuery(type).executeQuery()) {
             while (result.next()) {
                 instruments.add(new Instrument(
                         result.getInt(INSTRUMENT_COLUMN_ID),
@@ -91,7 +88,6 @@ public class SchoolDAO {
         String failureMsg = "Could not get student lease count.";
         getLeaseLockQuery(studentId).execute();
         int count = 0;
-
         try {
             PreparedStatement statement = getCountRentedInstrumentsQuery(null, studentId);
             count = getQueryRowCount(statement);
@@ -181,23 +177,18 @@ public class SchoolDAO {
         StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM rentable_instrument AS r " +
                 "JOIN lease AS l ON r.id=instrument_id " +
                 "WHERE CURRENT_DATE BETWEEN l.start_day AND l.end_day");
-
         if (instrumentId != null) {
             sb.append(" AND r.");
             sb.append(INSTRUMENT_COLUMN_ID);
             sb.append(" = ");
             sb.append(instrumentId);
         }
-
         if (studentId != null) {
             sb.append(" AND ");
             sb.append(LEASE_COLUMN_STUDENT_ID);
             sb.append(" = ");
             sb.append(studentId);
         }
-
-        System.out.println(sb);
-
         return connection.prepareStatement(sb.toString());
     }
 
