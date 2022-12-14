@@ -164,9 +164,9 @@ public class SchoolDAO {
                 INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + ", " + INSTRUMENT_COLUMN_TYPE + " " +
                 "FROM rentable_instrument AS r " +
                 "LEFT JOIN lease AS l ON r.id=instrument_id " +
-                // No END date or After end date or Before start date => Instrument is rentable
-                "WHERE (l.end_day IS NULL OR " +
-                "CURRENT_DATE >= l.end_day OR CURRENT_DATE < l.start_day) " +
+                // No end date OR current date after end date AND current date before start date => Instrument is rentable
+                "WHERE ((l.end_day IS NULL AND l.start_day IS NULL) OR " +
+                "(CURRENT_DATE >= l.end_day AND CURRENT_DATE < l.start_day)) " +
                 // Type as specified, if blank then list all instruments
                 (type.isBlank() ? "" : ("AND " + INSTRUMENT_COLUMN_TYPE + " = '" + type + "'"))
         );
