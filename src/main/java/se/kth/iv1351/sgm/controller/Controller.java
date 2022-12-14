@@ -64,13 +64,17 @@ public class Controller {
     /**
      * Adds lease
      **/
-    public void createLease(int student_id, int instrument_id, String end_day) throws RentalException {
+    public void createLease(int studentId, int instrumentId, String endDay) throws RentalException {
         try {
-            int countResult = schoolDb.readStudentLeaseCount(student_id);
-            if (countResult > 2)
+            int countResult = schoolDb.readStudentLeaseCount(studentId);
+            if (countResult >= 2)
                 throw new RentalException("Student cannot have more than 2 rentals simultaneously");
 
-            schoolDb.createLease(student_id, instrument_id, end_day);
+            boolean canRentInstrument = schoolDb.readCanRentInstrument(instrumentId);
+            if (!canRentInstrument)
+                throw new RentalException("Instrument cannot be rented");
+
+            schoolDb.createLease(studentId, instrumentId, endDay);
         } catch (Exception e) {
             throw new RentalException("Unable to rent.", e);
         }
