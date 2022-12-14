@@ -161,10 +161,13 @@ public class SchoolDAO {
 
     private PreparedStatement getFindAllRentableInstrumentsQuery(String type) throws SQLException {
         return connection.prepareStatement("SELECT r." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " +
-                INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + ", l." + LEASE_COLUMN_STUDENT_ID + " " +
+                INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + " " +
                 "FROM rentable_instrument AS r " +
-                "JOIN lease AS l ON r.id=instrument_id " +
-                "WHERE CURRENT_DATE NOT BETWEEN l.start_day AND l.end_day " +
+                "LEFT JOIN lease AS l ON r.id=instrument_id " +
+                // No END date or END date already passed => Instrument is rentable
+                "WHERE (l.end_day IS NULL OR " +
+                "CURRENT_DATE > l.end_day) " +
+                // Type as specified
                 "AND " + INSTRUMENT_COLUMN_TYPE + " = '" + type + "'"
         );
     }
