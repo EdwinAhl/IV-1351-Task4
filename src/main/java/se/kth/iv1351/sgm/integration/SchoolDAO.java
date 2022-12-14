@@ -164,9 +164,9 @@ public class SchoolDAO {
                 INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + " " +
                 "FROM rentable_instrument AS r " +
                 "LEFT JOIN lease AS l ON r.id=instrument_id " +
-                // No END date or END date already passed => Instrument is rentable
+                // No END date or After end date or Before start date => Instrument is rentable
                 "WHERE (l.end_day IS NULL OR " +
-                "CURRENT_DATE > l.end_day) " +
+                "CURRENT_DATE >= l.end_day OR CURRENT_DATE < l.start_day) " +
                 // Type as specified
                 "AND " + INSTRUMENT_COLUMN_TYPE + " = '" + type + "'"
         );
@@ -179,7 +179,9 @@ public class SchoolDAO {
     private PreparedStatement getCountRentedInstrumentsQuery(Integer instrumentId, Integer studentId) throws SQLException {
         StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM rentable_instrument AS r " +
                 "JOIN lease AS l ON r.id=instrument_id " +
-                "WHERE CURRENT_DATE BETWEEN l.start_day AND l.end_day");
+                // If current date is higher than start day and lower than end day
+                "WHERE (CURRENT_DATE => l.start_day AND CURRENT_DATE < l.end_day)");
+
         if (instrumentId != null) {
             sb.append(" AND r.");
             sb.append(INSTRUMENT_COLUMN_ID);
@@ -230,7 +232,7 @@ public class SchoolDAO {
     private PreparedStatement getLeaseTerminationQuery(int leaseId) throws SQLException {
         return connection.prepareStatement(
                 "UPDATE lease " +
-                        "SET end_day = CURRENT_DATE - 1 " +
+                        "SET end_day = CURRENT_DATE " +
                         "WHERE id = " + leaseId
         );
     }
