@@ -201,8 +201,9 @@ public class SchoolDAO {
         if (type != null) {
             sb.append(" AND ");
             sb.append(INSTRUMENT_COLUMN_TYPE);
-            sb.append(" = ");
+            sb.append(" = '");
             sb.append(type);
+            sb.append("'");
         }
 
         return connection.prepareStatement(sb.toString());
