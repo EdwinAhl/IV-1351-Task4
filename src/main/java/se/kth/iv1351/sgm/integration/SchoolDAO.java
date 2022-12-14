@@ -67,7 +67,7 @@ public class SchoolDAO {
         List<Instrument> instruments = new ArrayList<>();
 
         try (ResultSet result =
-                     getFindAllRentableInstrumentsQuery(null, null, type, false).executeQuery()) {
+                     getFindAllRentableInstrumentsQuery(type).executeQuery()) {
 
             while (result.next()) {
                 instruments.add(new Instrument(
@@ -93,7 +93,7 @@ public class SchoolDAO {
         int count = 0;
 
         try {
-            PreparedStatement statement = getFindAllRentableInstrumentsQuery(null, studentId, null, true);
+            PreparedStatement statement = getCountRentedInstrumentsQuery(null, studentId);
             count = getQueryRowCount(statement);
         } catch (SQLException sqlException) {
             handleException(failureMsg, sqlException);
@@ -108,7 +108,8 @@ public class SchoolDAO {
         String failureMsg = "Could not read instrument rented status.";
         boolean canRentInstrument = false;
         try {
-            PreparedStatement query = getFindAllRentableInstrumentsQuery(instrumentId, null, null, true);
+            PreparedStatement query = getCountRentedInstrumentsQuery(instrumentId, null);
+            // TODO THIS MAY COUNT AS LOGIC!
             canRentInstrument = getQueryRowCount(query) == 0;
         } catch (SQLException sqlException) {
             handleException(failureMsg, sqlException);
@@ -162,27 +163,24 @@ public class SchoolDAO {
         connection.setAutoCommit(false);
     }
 
-    /**
-     * Selects all rentable instruments of given type and id
-     * If any argument is null it will not be part of the query
-     *
-     * @param selectCount if this is specified then the count will be used instead of the instrument
-     */
-    private PreparedStatement getFindAllRentableInstrumentsQuery(Integer instrumentId, Integer studentId, String type, boolean selectCount) throws SQLException {
-        StringBuilder sb = new StringBuilder();
-
-        if (selectCount) {
-            sb.append("SELECT COUNT(*) ");
-        } else {
-            sb.append("SELECT r." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " +
-                    INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + ", l." + LEASE_COLUMN_STUDENT_ID + " ");
-        }
-
-        sb.append(
+    private PreparedStatement getFindAllRentableInstrumentsQuery(String type) throws SQLException {
+        return connection.prepareStatement("SELECT r." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " +
+                INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + ", l." + LEASE_COLUMN_STUDENT_ID + " " +
                 "FROM rentable_instrument AS r " +
-                        "JOIN lease AS l ON r.id=instrument_id " +
-                        "WHERE CURRENT_DATE BETWEEN l.start_day AND l.end_day"
+                "JOIN lease AS l ON r.id=instrument_id " +
+                "WHERE CURRENT_DATE NOT BETWEEN l.start_day AND l.end_day " +
+                "AND " + INSTRUMENT_COLUMN_TYPE + " = '" + type + "'"
         );
+    }
+
+    /**
+     * Selects all rented instruments of given instrumentId and studentId
+     * If any argument is null it will not be part of the query
+     */
+    private PreparedStatement getCountRentedInstrumentsQuery(Integer instrumentId, Integer studentId) throws SQLException {
+        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM rentable_instrument AS r " +
+                "JOIN lease AS l ON r.id=instrument_id " +
+                "WHERE CURRENT_DATE BETWEEN l.start_day AND l.end_day");
 
         if (instrumentId != null) {
             sb.append(" AND r.");
@@ -198,13 +196,7 @@ public class SchoolDAO {
             sb.append(studentId);
         }
 
-        if (type != null) {
-            sb.append(" AND ");
-            sb.append(INSTRUMENT_COLUMN_TYPE);
-            sb.append(" = '");
-            sb.append(type);
-            sb.append("'");
-        }
+        System.out.println(sb);
 
         return connection.prepareStatement(sb.toString());
     }
