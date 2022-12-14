@@ -64,9 +64,9 @@ public class Controller {
     /**
      * Adds lease
      **/
-    public void createRental(int student_id, int instrument_id, String end_day) throws RentalException {
+    public void createLease(int student_id, int instrument_id, String end_day) throws RentalException {
         try {
-            int countResult = schoolDb.readStudentRentalCount(student_id);
+            int countResult = schoolDb.readStudentLeaseCount(student_id);
             if (countResult > 2)
                 throw new RentalException("Student cannot have more than 2 rentals simultaneously");
 
@@ -77,9 +77,9 @@ public class Controller {
     }
 
     /**
-     * Terminates rental
+     * Terminates lease
      **/
-    public void terminateRental(int lease_id) throws RentalException {
+    public void terminateLease(int lease_id) throws RentalException {
         try {
             schoolDb.deleteLease(lease_id);
             System.out.println("Terminated lease_id " + lease_id);

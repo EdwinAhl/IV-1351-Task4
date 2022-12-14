@@ -85,13 +85,13 @@ public class BlockingInterpreter {
                         }
                         break;
                     case RENT:
-                        ctrl.createRental(
+                        ctrl.createLease(
                                 Integer.parseInt(cmdLine.getParameter(0)),  // student_id
                                 Integer.parseInt(cmdLine.getParameter(1)),  // instrument_id
                                 cmdLine.getParameter(2));                   // end_day
                         break;
                     case TERMINATE:
-                        ctrl.terminateRental(Integer.parseInt(cmdLine.getParameter(0)));
+                        ctrl.terminateLease(Integer.parseInt(cmdLine.getParameter(0)));
                         break;
                     default:
                         System.out.println("illegal command");
