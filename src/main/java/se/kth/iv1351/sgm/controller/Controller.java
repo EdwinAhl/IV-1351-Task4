@@ -107,12 +107,4 @@ public class Controller {
             throw new RentalException("Unable to terminate lease.", e);
         }
     }
-
-    private void commitOngoingTransaction(String failureMsg) throws InstrumentStockException {
-        try {
-            schoolDb.commit();
-        } catch (SchoolDBException bdbe) {
-            throw new InstrumentStockException(failureMsg, bdbe);
-        }
-    }
 }
