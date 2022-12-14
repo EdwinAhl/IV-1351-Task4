@@ -55,29 +55,33 @@ public class Controller {
      **/
     public List<? extends InstrumentDTO> getInstruments(String type) throws InstrumentStockException {
         try {
-            return schoolDb.getInstruments(type);
+            return schoolDb.readRentableInstruments(type);
         } catch (Exception e) {
             throw new InstrumentStockException("Unable to list instruments.", e);
         }
     }
 
-    // Adds lease
+    /**
+     * Adds lease
+     **/
     public void createRental(int student_id, int instrument_id, String end_day) throws RentalException {
         try {
-            int countResult = schoolDb.getStudentRentalCount(student_id);
+            int countResult = schoolDb.readStudentRentalCount(student_id);
             if (countResult > 2)
                 throw new RentalException("Student cannot have more than 2 rentals simultaneously");
 
-            schoolDb.createRental(student_id, instrument_id, end_day);
+            schoolDb.createLease(student_id, instrument_id, end_day);
         } catch (Exception e) {
             throw new RentalException("Unable to rent.", e);
         }
     }
 
-    // Terminates rental
+    /**
+     * Terminates rental
+     **/
     public void terminateRental(int lease_id) throws RentalException {
         try {
-            schoolDb.terminateRental(lease_id);
+            schoolDb.deleteLease(lease_id);
             System.out.println("Terminated lease_id " + lease_id);
         } catch (Exception e) {
             throw new RentalException("Unable to terminate lease.", e);

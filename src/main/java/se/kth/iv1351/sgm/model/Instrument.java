@@ -1,11 +1,11 @@
 package se.kth.iv1351.sgm.model;
 
 public class Instrument implements InstrumentDTO{
-    int id;
-    int price;
-    String type;
-    String brand;
-    String quality;
+    private int id;
+    private int price;
+    private String type;
+    private String brand;
+    private String quality;
 
     public Instrument(int id, int price, String type, String brand, String quality){
         this.id = id;

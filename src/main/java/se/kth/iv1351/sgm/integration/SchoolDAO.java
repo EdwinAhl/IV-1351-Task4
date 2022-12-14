@@ -54,8 +54,7 @@ public class SchoolDAO {
      */
     public SchoolDAO() throws SchoolDBException {
         try {
-            connectToBankDB();
-            prepareStatements();
+            connectToSchoolDB();
         } catch (ClassNotFoundException | SQLException exception) {
             throw new SchoolDBException("Could not connect to datasource.", exception);
         }
@@ -64,7 +63,7 @@ public class SchoolDAO {
     /**
      * @return A list of all rentable_instruments (not currently leased)
      */
-    public List<Instrument> getInstruments(String type) throws SchoolDBException {
+    public List<Instrument> readRentableInstruments(String type) throws SchoolDBException {
         String failureMsg = "Could not list instruments.";
         List<Instrument> instruments = new ArrayList<>();
 
@@ -84,7 +83,10 @@ public class SchoolDAO {
         return instruments;
     }
 
-    public int getStudentRentalCount(int studentId) throws SQLException, SchoolDBException {
+    /**
+     * Reads number of rentals a student with given student_id has
+     **/
+    public int readStudentRentalCount(int studentId) throws SQLException, SchoolDBException {
         String failureMsg = "Could not get student rental count.";
         getLeaseLockQuery(studentId).execute();
 
@@ -97,8 +99,10 @@ public class SchoolDAO {
     }
 
 
-    // Adds lease
-    public void createRental(int studentId, int instrumentId, String endDay) throws SchoolDBException {
+    /**
+     * Creates lease
+     */
+    public void createLease(int studentId, int instrumentId, String endDay) throws SchoolDBException {
         String failureMsg = "Could not add lease.";
         try {
             ResultSet leaseResult = getLeaseCreatorQuery(studentId, endDay).executeQuery();
@@ -116,7 +120,7 @@ public class SchoolDAO {
     /**
      * Terminates the lease by setting the end date to today and removing the rental from the instrument
      **/
-    public void terminateRental(int leaseId) throws SchoolDBException {
+    public void deleteLease(int leaseId) throws SchoolDBException {
         // TODO this does not save which instrument was rented!
         String failureMsg = "Could not terminate rental.";
         try {
@@ -142,14 +146,10 @@ public class SchoolDAO {
         }
     }
 
-    private void connectToBankDB() throws ClassNotFoundException, SQLException {
+    private void connectToSchoolDB() throws ClassNotFoundException, SQLException {
         connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/sgm",
                 "postgres", "post");
         connection.setAutoCommit(false);
-    }
-
-    private void prepareStatements() throws SQLException {
-        //findAllPeopleStatement = connection.prepareStatement("SELECT * FROM PERSON");
     }
 
     /**
