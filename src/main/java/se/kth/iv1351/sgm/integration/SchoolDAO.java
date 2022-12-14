@@ -70,7 +70,7 @@ public class SchoolDAO {
                 instruments.add(new Instrument(
                         result.getInt(INSTRUMENT_COLUMN_ID),
                         result.getInt(INSTRUMENT_COLUMN_PRICE),
-                        type,
+                        result.getString(INSTRUMENT_COLUMN_TYPE),
                         result.getString(INSTRUMENT_COLUMN_BRAND),
                         result.getString(INSTRUMENT_COLUMN_QUALITY)));
             }
@@ -161,14 +161,14 @@ public class SchoolDAO {
 
     private PreparedStatement getFindAllRentableInstrumentsQuery(String type) throws SQLException {
         return connection.prepareStatement("SELECT r." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " +
-                INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + " " +
+                INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + ", " + INSTRUMENT_COLUMN_TYPE + " " +
                 "FROM rentable_instrument AS r " +
                 "LEFT JOIN lease AS l ON r.id=instrument_id " +
                 // No END date or After end date or Before start date => Instrument is rentable
                 "WHERE (l.end_day IS NULL OR " +
                 "CURRENT_DATE >= l.end_day OR CURRENT_DATE < l.start_day) " +
-                // Type as specified
-                "AND " + INSTRUMENT_COLUMN_TYPE + " = '" + type + "'"
+                // Type as specified, if blank then list all instruments
+                (type.isBlank() ? "" : ("AND " + INSTRUMENT_COLUMN_TYPE + " = '" + type + "'"))
         );
     }
 

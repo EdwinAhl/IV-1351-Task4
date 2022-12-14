@@ -23,6 +23,9 @@
 
 package se.kth.iv1351.sgm.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import se.kth.iv1351.sgm.integration.SchoolDAO;
@@ -66,10 +69,23 @@ public class Controller {
      **/
     public void createLease(int studentId, int instrumentId, String endDay) throws RentalException {
         try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date parsedDate = sdf.parse(endDay);
+
+            Calendar cal = Calendar.getInstance();
+            Date currentDate = cal.getTime();
+            cal.add(Calendar.YEAR, 1);
+            Date currentTimePlusOneYear = cal.getTime();
+
+            if (parsedDate.after(currentTimePlusOneYear) || parsedDate.before(currentDate)) {
+                throw new RentalException("The end rent date cannot be today or after more than 12 months.");
+            }
+
             int countResult = schoolDb.readStudentLeaseCount(studentId);
             if (countResult >= 2) {
-                throw new RentalException("Student cannot have more than 2 rentals simultaneously");
+                throw new RentalException("Student cannot have more than 2 rentals simultaneously.");
             }
+
             boolean canRentInstrument = schoolDb.readCanRentInstrument(instrumentId);
             if (!canRentInstrument) {
                 throw new RentalException("Instrument cannot be rented");

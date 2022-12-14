@@ -19,7 +19,7 @@ public class Instrument implements InstrumentDTO{
     public String toString(){
         return "id: " + getId() +
                 ", price: " + getPrice() +
-                //", type: " + getType() +
+                ", type: " + getType() +
                 ", brand: " + getBrand() +
                 ", quality: " + getQuality();
     }
