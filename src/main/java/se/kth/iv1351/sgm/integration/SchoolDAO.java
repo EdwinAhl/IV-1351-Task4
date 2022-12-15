@@ -163,7 +163,8 @@ public class SchoolDAO {
     }
 
     private PreparedStatement getFindAllRentableInstrumentsQuery(String type) throws SQLException {
-        return connection.prepareStatement("SELECT DISTINCT r." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " +
+        return connection.prepareStatement(
+                "SELECT DISTINCT r." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " +
                 INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + ", " + INSTRUMENT_COLUMN_TYPE + " " +
                 "FROM rentable_instrument AS r " +
                 "LEFT JOIN lease AS l ON r.id=instrument_id " +
@@ -210,7 +211,7 @@ public class SchoolDAO {
     }
 
     /**
-     * Locks leases
+     * Locks leases for isolation
      */
     private PreparedStatement getLeaseLockQuery(int studentId) throws SQLException {
         return connection.prepareStatement(

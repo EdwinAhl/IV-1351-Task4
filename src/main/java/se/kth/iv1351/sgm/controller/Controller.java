@@ -72,6 +72,7 @@ public class Controller {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date parsedDate = sdf.parse(endDay);
 
+            // Check valid end_day
             Calendar cal = Calendar.getInstance();
             Date currentDate = cal.getTime();
             cal.add(Calendar.YEAR, 1);
@@ -81,15 +82,19 @@ public class Controller {
                 throw new RentalException("The end rent date cannot be today or after more than 12 months.");
             }
 
+            // Check valid lease count of student
             int countResult = schoolDb.readStudentLeaseCount(studentId);
             if (countResult >= 2) {
                 throw new RentalException("Student cannot have more than 2 rentals simultaneously.");
             }
 
+            // Check valid instrument
             boolean canRentInstrument = schoolDb.readCanRentInstrument(instrumentId);
             if (!canRentInstrument) {
                 throw new RentalException("Instrument cannot be rented");
             }
+
+            // student_id validated by FK constraint
             int leaseId = schoolDb.createLease(studentId, instrumentId, endDay);
             System.out.println("Created lease_id " + leaseId);
         } catch (Exception e) {
