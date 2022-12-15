@@ -112,7 +112,7 @@ public class Controller {
      **/
     public void terminateLease(int leaseId) throws RentalException {
         try {
-            schoolDb.deleteLease(leaseId);
+            schoolDb.updateLeaseEndDate(leaseId);
             System.out.println("Terminated lease_id " + leaseId);
         } catch (Exception e) {
             throw new RentalException("Unable to terminate lease.", e);

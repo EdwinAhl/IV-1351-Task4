@@ -131,7 +131,7 @@ public class SchoolDAO {
     /**
      * Terminates the lease by setting the end date to today and removing the rental from the instrument
      **/
-    public void deleteLease(int leaseId) throws SchoolDBException {
+    public void updateLeaseEndDate(int leaseId) throws SchoolDBException {
         String failureMsg = "Could not terminate rental.";
         try {
             getLeaseTerminationQuery(leaseId).executeUpdate();
