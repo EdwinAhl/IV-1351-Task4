@@ -163,13 +163,16 @@ public class SchoolDAO {
     }
 
     private PreparedStatement getFindAllRentableInstrumentsQuery(String type) throws SQLException {
-        return connection.prepareStatement("SELECT r." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " +
+        return connection.prepareStatement("SELECT DISTINCT r." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " +
                 INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + ", " + INSTRUMENT_COLUMN_TYPE + " " +
                 "FROM rentable_instrument AS r " +
                 "LEFT JOIN lease AS l ON r.id=instrument_id " +
-                // No end date OR current date after end date AND current date before start date => Instrument is rentable
-                "WHERE ((l.end_day IS NULL AND l.start_day IS NULL) OR " +
-                "(CURRENT_DATE >= l.end_day AND CURRENT_DATE < l.start_day)) " +
+                // r.id should not be in the set of rented instrument ids
+                "WHERE r.id NOT IN( " +
+                "   SELECT DISTINCT r.id FROM rentable_instrument AS r" +
+                "   LEFT JOIN lease AS l ON r.id = instrument_id" +
+                "   WHERE(CURRENT_DATE >= l.start_day AND CURRENT_DATE < l.end_day)" +
+                ")" +
                 // Type as specified, if blank then list all instruments
                 (type.isBlank() ? "" : ("AND " + INSTRUMENT_COLUMN_TYPE + " = '" + type + "'"))
         );
@@ -182,7 +185,7 @@ public class SchoolDAO {
     private PreparedStatement getCountRentedInstrumentsQuery(Integer instrumentId, Integer studentId) throws SQLException {
         StringBuilder sb = new StringBuilder("SELECT COUNT(*), COUNT(*)=0 as " + COLUMN_IS_EMPTY + " FROM rentable_instrument AS r " +
                 "JOIN lease AS l ON r.id=instrument_id " +
-                // If current date is higher than start day and lower than end day
+                // If current date is higher than start day and lower than end day --> Currently rented
                 "WHERE (CURRENT_DATE >= l.start_day AND CURRENT_DATE < l.end_day)");
         if (instrumentId != null) {
             sb.append(" AND r.");
