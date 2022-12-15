@@ -47,7 +47,6 @@ public class SchoolDAO {
     private static final String LEASE_COLUMN_INSTRUMENT_ID = "instrument_id";
 
     private Connection connection;
-    //private PreparedStatement findAllPeopleStatement;
 
     /**
      * Constructs a new DAO object connected to the bank database.
@@ -181,7 +180,6 @@ public class SchoolDAO {
                 "JOIN lease AS l ON r.id=instrument_id " +
                 // If current date is higher than start day and lower than end day
                 "WHERE (CURRENT_DATE >= l.start_day AND CURRENT_DATE < l.end_day)");
-
         if (instrumentId != null) {
             sb.append(" AND r.");
             sb.append(INSTRUMENT_COLUMN_ID);
