@@ -23,6 +23,7 @@
 
 package se.kth.iv1351.sgm.controller;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,7 +68,8 @@ public class Controller {
     /**
      * Adds lease
      **/
-    public void createLease(int studentId, int instrumentId, String endDay) throws RentalException {
+    public void createLease(int studentId, int instrumentId, String endDay) throws RentalException, ParseException {
+        String failureMsg = "Unable to rent.";
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date parsedDate = sdf.parse(endDay);
@@ -97,8 +99,11 @@ public class Controller {
             // student_id validated by FK constraint
             int leaseId = schoolDb.createLease(studentId, instrumentId, endDay);
             System.out.println("Created lease_id " + leaseId);
+        } catch (SchoolDBException sdbe) {
+            throw new RentalException(failureMsg, sdbe);
         } catch (Exception e) {
-            throw new RentalException("Unable to rent.", e);
+            commitOngoingTransaction(failureMsg);
+            throw e;
         }
     }
 
@@ -111,6 +116,14 @@ public class Controller {
             System.out.println("Terminated lease_id " + leaseId);
         } catch (Exception e) {
             throw new RentalException("Unable to terminate lease.", e);
+        }
+    }
+
+    private void commitOngoingTransaction(String failureMsg) throws RentalException {
+        try {
+            schoolDb.commit();
+        } catch (SchoolDBException e) {
+            throw new RentalException(failureMsg, e);
         }
     }
 }

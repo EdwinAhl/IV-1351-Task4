@@ -84,11 +84,11 @@ public class SchoolDAO {
     /**
      * Reads number of leases a student with given student_id has
      **/
-    public int readStudentLeaseCount(int studentId) throws SQLException, SchoolDBException {
+    public int readStudentLeaseCount(int studentId) throws SchoolDBException {
         String failureMsg = "Could not get student lease count.";
-        getLeaseLockQuery(studentId).execute();
         int count = 0;
         try {
+            getLeaseLockQuery(studentId).execute();
             PreparedStatement statement = getCountRentedInstrumentsQuery(null, studentId);
             count = getQueryRowCount(statement);
         } catch (SQLException sqlException) {
