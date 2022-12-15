@@ -163,18 +163,16 @@ public class SchoolDAO {
 
     private PreparedStatement getFindAllRentableInstrumentsQuery(String type) throws SQLException {
         return connection.prepareStatement(
-                "SELECT DISTINCT r." + INSTRUMENT_COLUMN_ID + " , " + INSTRUMENT_COLUMN_PRICE + ", " +
-                INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + ", " + INSTRUMENT_COLUMN_TYPE + " " +
-                "FROM rentable_instrument AS r " +
-                "LEFT JOIN lease AS l ON r.id=instrument_id " +
-                // r.id should not be in the set of rented instrument ids
-                "WHERE r.id NOT IN( " +
-                "   SELECT DISTINCT r.id FROM rentable_instrument AS r" +
-                "   LEFT JOIN lease AS l ON r.id = instrument_id" +
-                "   WHERE(CURRENT_DATE >= l.start_day AND CURRENT_DATE < l.end_day)" +
-                ")" +
-                // Type as specified, if blank then list all instruments
-                (type.isBlank() ? "" : ("AND " + INSTRUMENT_COLUMN_TYPE + " = '" + type + "'"))
+                "SELECT DISTINCT " + INSTRUMENT_COLUMN_ID + ", " + INSTRUMENT_COLUMN_PRICE + ", " +
+                        INSTRUMENT_COLUMN_BRAND + ", " + INSTRUMENT_COLUMN_QUALITY + ", " + INSTRUMENT_COLUMN_TYPE + " " +
+                        "FROM rentable_instrument " +
+                        // r.id should not be in the set of rented instrument ids
+                        "WHERE id NOT IN (" +
+                        "   SELECT DISTINCT instrument_id as id FROM lease " +
+                        "   WHERE (CURRENT_DATE >= start_day AND CURRENT_DATE < end_day) " +
+                        ")" +
+                        // Type as specified, if blank then list all instruments
+                        (type.isBlank() ? "" : ("AND " + INSTRUMENT_COLUMN_TYPE + " = '" + type + "'"))
         );
     }
 
