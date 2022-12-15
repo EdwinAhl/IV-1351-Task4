@@ -90,7 +90,8 @@ public class Controller {
             if (!canRentInstrument) {
                 throw new RentalException("Instrument cannot be rented");
             }
-            schoolDb.createLease(studentId, instrumentId, endDay);
+            int leaseId = schoolDb.createLease(studentId, instrumentId, endDay);
+            System.out.println("Created lease_id " + leaseId);
         } catch (Exception e) {
             throw new RentalException("Unable to rent.", e);
         }
