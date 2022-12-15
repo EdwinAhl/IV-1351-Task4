@@ -118,8 +118,7 @@ public class SchoolDAO {
     public int createLease(int studentId, int instrumentId, String endDay) throws SchoolDBException {
         String failureMsg = "Could not add lease.";
         int lease_id = 0;
-        try {
-            ResultSet leaseResult = getLeaseCreatorQuery(studentId, instrumentId, endDay).executeQuery();
+        try (ResultSet leaseResult = getLeaseCreatorQuery(studentId, instrumentId, endDay).executeQuery()) {
             leaseResult.next();
             lease_id = leaseResult.getInt("id");
             connection.commit();
@@ -224,7 +223,7 @@ public class SchoolDAO {
     /**
      * Creates a lease starting at the current date and ending at the specified end date
      **/
-    private PreparedStatement getLeaseCreatorQuery(int studentId, Integer instrumentId, String endDay) throws SQLException {
+    private PreparedStatement getLeaseCreatorQuery(int studentId, int instrumentId, String endDay) throws SQLException {
         return connection.prepareStatement(
                 "INSERT INTO lease(student_id, instrument_id, start_day, end_day) " +
                         "VALUES " +
