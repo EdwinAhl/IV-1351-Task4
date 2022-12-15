@@ -130,15 +130,18 @@ public class SchoolDAO {
 
     /**
      * Terminates the lease by setting the end date to today and removing the rental from the instrument
+     * @return updated rows
      **/
-    public void updateLeaseEndDate(int leaseId) throws SchoolDBException {
+    public int updateLeaseEndDate(int leaseId) throws SchoolDBException {
         String failureMsg = "Could not terminate rental.";
+        int updatedRows = 0;
         try {
-            getLeaseTerminationQuery(leaseId).executeUpdate();
+            updatedRows = getLeaseTerminationQuery(leaseId).executeUpdate();
             connection.commit();
         } catch (SQLException sqlException) {
             handleException(failureMsg, sqlException);
         }
+        return updatedRows;
     }
 
     /**

@@ -112,7 +112,9 @@ public class Controller {
      **/
     public void terminateLease(int leaseId) throws RentalException {
         try {
-            schoolDb.updateLeaseEndDate(leaseId);
+            int updatedRows = schoolDb.updateLeaseEndDate(leaseId);
+            if (updatedRows == 0) throw new RentalException("The specified lease does not exist.");
+
             System.out.println("Terminated lease_id " + leaseId);
         } catch (Exception e) {
             throw new RentalException("Unable to terminate lease.", e);
